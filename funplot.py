@@ -4,9 +4,17 @@ import sympy as _sp
 
 from typing import Callable, Union
 
+def funplot_init():
+    _plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "serif",
+        "font.serif": ["Palatino"],
+    })
+
 class Space:
     def __init__(self, objects = None, **kwargs):
         self._kwargs = kwargs
+        self._legend = kwargs.pop("legend") if "legend" in kwargs else False
         self._objects = PhsyicalCollection() if objects is None else objects
     
     def __add__(self, obj):
@@ -21,8 +29,13 @@ class Space:
 
     def plot(self):
         self._objects.plot()
+        if self._legend:
+            _plt.legend()
         for key, value in self._kwargs.items():
-            getattr(_plt, key)(value)
+            try:
+                getattr(_plt, key)(value)
+            except AttributeError:
+                raise AttributeError("Unsupported keyword argument: " + key)
 
     def show(self):
         self.plot()
@@ -104,6 +117,10 @@ class Func(Physical):
             raise TypeError("Function must be a string or a callable object.")
 
         if isinstance(domain, tuple):
+            if len(domain) < 2 or len(domain) > 3:
+                raise ValueError("Domain must be a tuple of length 2 or 3.")
+            elif len(domain) == 2:
+                domain = (*domain, 100)
             self._domain = _np.linspace(*domain)
         elif isinstance(domain, _np.ndarray):
             self._domain = domain
