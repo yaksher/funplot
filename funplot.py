@@ -27,6 +27,9 @@ class Space:
     def show(self):
         self.plot()
         _plt.show()
+
+    def plus(self, obj):
+        return self + obj
     
     def save(self, filename, **kwargs):
         self.plot()
